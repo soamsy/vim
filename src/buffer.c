@@ -388,6 +388,10 @@ open_buffer(
 	}
     }
 
+#ifdef WASM_PTY
+	speedrun_autosave();
+#endif // WASM_PTY
+
     return retval;
 }
 

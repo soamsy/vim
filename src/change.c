@@ -67,6 +67,31 @@ change_warning(int col)
 	showmode();
 }
 
+void speedrun_autosave() {
+	exarg_T	ea;
+	ea.cmd = "w!";
+	char_u	*homedir_env = mch_getenv((char_u *)"HOME");
+	int home_len = STRLEN(homedir_env);
+	char_u *speedrun_path = alloc_clear(home_len + 20);
+	speedrun_path[0] = '\0';
+	STRNCAT(speedrun_path, homedir_env, home_len);
+	STRNCAT(speedrun_path, "/.vimspeedrun", 14);
+	ea.arg = speedrun_path;
+	ea.forceit = TRUE;
+	ea.cmdidx = CMD_write;
+	// ea.argt = 17432959;
+	// ea.argt = (long)cmdnames[(int)ea.cmdidx].cmd_argt; // 17432959
+	ea.argt = EX_RANGE|EX_WHOLEFOLD|EX_BANG|EX_FILE1|EX_ARGOPT|EX_DFLALL|EX_TRLBAR|EX_CMDWIN|EX_LOCK_OK;
+	ea.addr_type = ADDR_LINES;
+	ea.line1 = 1;
+	ea.line2 = curbuf->b_ml.ml_line_count;
+	ea.append = FALSE;
+	ea.force_enc = 0;
+	ea.force_ff = 'u';
+	int retval = buf_write_speedrun(curbuf, ea.arg, ea.arg, ea.line1, ea.line2, &ea, ea.append, ea.forceit, TRUE, TRUE);
+	vim_free(speedrun_path);
+}
+
 /*
  * Call this function when something in the current buffer is changed.
  *
@@ -129,6 +154,10 @@ changed(void)
     // If a pattern is highlighted, the position may now be invalid.
     highlight_match = FALSE;
 #endif
+
+#ifdef WASM_PTY
+	speedrun_autosave();
+#endif // WASM_PTY
 }
 
 /*

@@ -5388,6 +5388,9 @@ win_enter_ext(win_T *wp, int flags)
     // Change directories when the 'acd' option is set.
     DO_AUTOCHDIR;
 
+#ifdef WASM_PTY
+	speedrun_autosave();
+#endif // WASM_PTY
     return did_decrement;
 }
 

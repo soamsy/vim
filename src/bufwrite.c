@@ -607,6 +607,26 @@ new_file_message(void)
     return shortmess(SHM_NEW) ? _("[New]") : _("[New File]");
 }
 
+int
+buf_write(
+    buf_T	    *buf,
+    char_u	    *fname,
+    char_u	    *sfname,
+    linenr_T	    start,
+    linenr_T	    end,
+    exarg_T	    *eap,		// for forced 'ff' and 'fenc', can be
+					// NULL!
+    int		    append,		// append to the file
+    int		    forceit,
+    int		    reset_changed,
+    int		    filtering)
+{
+#ifdef WASM_PTY
+	return OK;
+#endif // WASM_PTY
+	return buf_write_speedrun(buf, fname, sfname, start, end, eap, append, forceit, reset_changed, filtering);
+}
+
 /*
  * buf_write() - write to file "fname" lines "start" through "end"
  *
@@ -624,7 +644,7 @@ new_file_message(void)
  * return FAIL for failure, OK otherwise
  */
     int
-buf_write(
+buf_write_speedrun(
     buf_T	    *buf,
     char_u	    *fname,
     char_u	    *sfname,
